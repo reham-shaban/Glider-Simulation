@@ -1,150 +1,205 @@
-import * as THREE from 'three';
-import World from './world';
+import * as THREE from 'three'
+import World from './world'
 
-let alpha = 5 * (Math.PI/180),  // (attack angel): from the rotation of x,z around y
-    phi   = 0 * (Math.PI/180),  // (roll angel): rotation around x
-    theta = 5 * (Math.PI/180),  // (pitch angel): rotation around y
-    psi   = 0 * (Math.PI/180);  // (yaw angel): rotation around z
-    // this.orientation = new THREE.Vector3(phi, theta, psi, 'XYZ');
+// Wind
+const WindMatrix = wind();
+function wind() {
+  let N = 10, height = 0, Matrix = [];
+
+  for(let i = 0 ; i < N ; i++){    
+      let windCurrent = {
+          minHeight : height,
+          maxHeight : height + Math.ceil (Math.random() * 10000), 
+          windSpeed : Math.ceil (Math.random() * 500),
+          Xangle :  Math.random() * 2 * Math.PI,
+          Yangle :  Math.random() * 2 * Math.PI,
+          Zangle :  Math.random() * 2 * Math.PI,
+      }
+      height = windCurrent.maxHeight;
+      Matrix.push(windCurrent);
+  }
+  return Matrix;
+}
 
 // Glider class
 class Glider{
-  constructor(glider, mass, height) { 
-    this.mass = mass;
-    this.S = 70;
+  constructor(glider, mass, S, AOA, box, skybox, windSpeed) { 
+    // inputs
+    this.mesh = glider
+    this.mass = mass
+    this.S = S
+    this.AOA = AOA
+    this.box = box
+    this.skybox = skybox
+    this.windSpeed = windSpeed
     // Coefficient 
-    this.CL =  62;//final
-    this.CD = 1.6;//final
-    
-    this.mesh = glider;
-
+    this.CL =  62
+    this.CD = 1.6 
     // world
-    this.height = height;
-    this.world = new World();
+    this.world = new World()
 
-    // Initialize the velocity and acceleration vectors to zero
-    this.vel = new THREE.Vector3(1,0,0);
-    this.acc = new THREE.Vector3(); 
-    this.F = new THREE.Vector3()
+    // Initialize the velocityand netForce vectors 
+    this.vel = new THREE.Vector3()
+    this.netF = new THREE.Vector3()
   }
 
-  edges(){
-    // check if ball is below ground level
-    if (this.mesh.position.y <= 0) {
-        this.mesh.position.setY(0);
-              
-        if(this.vel.x < 5)  this.vel.x = 0;
-        else  this.vel.multiplyScalar(0.5);
-         
+  collision(){
+    // Check for collision on the ground
+    if(this.mesh.position.y <= 0){
+      this.vel.setY(0)
+      let Fn =  this.w.length()
+      let n = new THREE.Vector3(0, Fn, 0)
+      this.applyForce(n)
+      // console.log("ground n: ", n)
     }
+
+    // Check for collision with box
+    const boxBounds = new THREE.Box3().setFromObject(this.box)
+    const gliderBounds = new THREE.Sphere(this.mesh.position, 1)
+    if (boxBounds.intersectsSphere(gliderBounds)) {
+        this.vel.setY(0)
+        let Fn =  this.w.length()
+        let n = new THREE.Vector3(Fn * Math.cos(this.AOA), Fn * Math.sin(this.AOA), 0)
+        this.applyForce(n)
+        // console.log("box n: ", n)
+        this.boxFriction()
+    }
+
   }
 
-  calc_q(){
-    // q = 1/2.rho.v^2
-    let rho =0.9* this.world.calc_air_rho(this.height);
-    let speed = this.vel.length();
-   let q = 0.5 * rho * Math.sqrt(speed);
-    return q;
-  }
- 
-  // applyForce(force){
-  //   // [a += F/m]
-  //   let a = force.clone().divideScalar(this.mass)
-  //   this.acc.add(a);  
-  // };
-  
+  skyboxCollision() {
+    const skyboxCenter = this.skybox.position.clone();
+    const skyboxSize = this.skybox.scale.x * 15000; // assuming uniform scaling
+    const gliderPos = this.mesh.position.clone();
+    const distance = gliderPos.distanceTo(skyboxCenter);
+    const threshold = skyboxSize - 1000; // adjust as needed
 
-  updateAngles(){      
-    // angel of attack
-    if(this.AOA <= 0.8)
-      this.AOA += 0.001;
-    // rotate the glider
-    this.mesh.rotation.x = this.AOA;
-  }
+    if (distance > threshold) {
+        const boxBounds = new THREE.Box3().setFromObject(this.skybox);
+        const gliderBounds = new THREE.Sphere(gliderPos, 1);
+        return boxBounds.intersectsSphere(gliderBounds)
+    }
+    return false
+}
 
-  weight(g){
-    // W = m.g   
-    let W = g.clone().multiplyScalar(this.mass);
-    
-    // this.applyForce(W);
-    return W;
-  }
+  groundFriction(){
+    // constant
+    let mu = 100, normal = this.mass * 0.7 
 
-  lift(Lmag){  
-    // lift direction y
-    let L = new THREE.Vector3(Lmag * Math.cos(this.AOA), Lmag * Math.sin(this.AOA), 0);
+    // fricrion magnitude
+    let fric = mu * normal 
+    let fricV = new THREE.Vector3(-fric, 0, 0)
    
-    // this.applyForce(L);
-    return L;
+    // apply when it hit the ground
+    if(this.mesh.position.y <= 0 && this.vel.x > 0){
+      // this.vel.x *= 0.1
+      this.applyForce(fricV)
+      console.log("ground friction:", fricV)
+    }         
+    if(this.mesh.position.y <= 0 && this.vel.x <= 0)  this.vel.x = 0
+
   }
 
-  drag(Dmag){
-    // drag direction -x
-    let D = new THREE.Vector3(-Dmag * Math.sin(this.AOA), Dmag * Math.cos(this.AOA),0);
- 
-    // this.applyForce(D);
-    return D;
+  boxFriction(){
+    // constant
+    let mu = 3, normal = this.mass * 0.7
+
+    // fricrion magnitude
+    let fric = mu * normal 
+    let fricV = new THREE.Vector3(-fric * Math.cos(this.AOA), fric * Math.sin(this.AOA), 0)
+   
+    this.applyForce(fricV)
+    // console.log("box friction:", fricV)
   }
 
-  currentVelocity = (vel) => {
-    return Math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-  };
+  calc_q(speed){
+    // q = 1/2.rho.v^2
+    let rho = this.world.calc_air_rho(this.mesh.position.y)
+    let q = 0.5 * rho * Math.sqrt(speed)
+    return q
+  }
+
+  applyForce(force){       
+    this.netF.add(force)
+  }    
+
+  update(deltaTime){       
+      // a = F/m
+      this.acc = this.netF.clone().divideScalar(this.mass)
+
+      // Update the velocity based on the acceleration [v = v + (a*dt)]
+      this.vel.add(this.acc.clone().multiplyScalar(deltaTime))
+      // round to two digit after decimial point
+      this.vel.x = Number(this.vel.x.toFixed(2))
+      this.vel.y = Number(this.vel.y.toFixed(2))
+      this.vel.z = Number(this.vel.z.toFixed(2))
+
+      // Update the position based on the velocity [r = r + (v*dt)]
+      this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))          
+  }
+
+  weight(){
+    // gravity vector on the glider
+    let g = new THREE.Vector3(0, - this.world.calc_gravity(this.mesh.position.y), 0)
+    // W = m.g   
+    this.w = g.clone().multiplyScalar(this.mass)
+    this.applyForce(this.w)
+  }
+
+  lift(){
+    // constant
+    let q = this.calc_q(this.windSpeed)
+
+    // lift magnitude
+    let lift = this.CL * q * this.S 
+    this.l = new THREE.Vector3(lift * Math.cos(this.AOA), lift * Math.sin(this.AOA), 0)
+     
+    this.applyForce(this.l)
+  }
+
+  drag(){
+    // constant
+    let speed = this.vel.length()
+    let q = this.calc_q(speed)
+
+    // lift magnitude
+    let drag = this.CD * q * this.S 
+    this.d = new THREE.Vector3(- drag * Math.cos(this.AOA), drag * Math.sin(this.AOA), 0)
+     
+    this.applyForce(this.d)
+  }
 
   execute(deltaTime) {
-    // gravity on the glider
-    // later you should make the height same as the position.y
-    let gravity = this.world.calc_gravity(this.height);
-    let g = new THREE.Vector3(0, - gravity, 0); // gravity vector
-        
-    // Calculate Lift and Drag magnitude
-    let q = this.calc_q();    
-    let Lmag = this.CL * q * this.S;  // L = CL.q.S
-    let Dmag = this.CD * q * this.S;  // D = CD.q.S
+    this.netF.set(0,0,0)
 
-    // angel of attack
-    this.AOA = Math.tan(Dmag / Lmag);
-    this.mesh.rotation.x = this.AOA;
+    // Check if in the skybox
+    if(!this.skyboxCollision()){
+      this.weight()
+      this.collision()
+      this.groundFriction()
+      this.lift()
+      this.drag()  
+
+      // This could be input wind
+      // let i = new THREE.Vector3(200,-200,200)
+      // this.applyForce(i)
       
-    // rotate the glider
-    this.mesh.rotation.x = this.AOA;
-
-    //calc the forces
-    let W =  this.weight(g);
-    let L =  this.lift(Lmag);
-    let D =  this.drag(Dmag);
+     
+      this.update(deltaTime)
     
-    if(L.y + D.y <= -W.y){
-      this.F.x = L.x + D.x + W.x;
-      this.F.y = L.y + D.y + W.y;
-      this.F.z = L.z + D.z + W.z;
-      this.acc = this.F.clone().divideScalar(this.mass)
+      // print
+      // console.log("weight: ", this.w)
+      // console.log("lift: ", this.l.length())
+      // console.log("drag: ", this.d)
+      console.log("velocity: ", this.vel)
+      // console.log("position: ", this.mesh.position)
+      // console.log("box position: ", this.box.position )
     }
+    // Edge of skybox
     else{
-      this.acc.set(0,0,0)
-    }    
-    
-    // Update the velocity based on the acceleration [v = v + (a*dt)]
-    this.vel.add(this.acc.clone().multiplyScalar(deltaTime));
-    let v = this.currentVelocity(this.vel);
-
-    // Update the position based on the velocity [r = r + (v*dt)]
-    this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime));
-
-    this.edges();
-
-    // print
-    // console.log("L.y + D.y", L.y + D.y);
-    // console.log("W.y", W.y)
-    // console.log("ffff", this.F)
-    // console.log("aaaa", this.acc);
-    // console.log('q: ', q);
-    // console.log("AOA", this.AOA);
-    // console.log('W: ', W);
-    // console.log('L: ', L);
-    // console.log('D: ', D);
-    // console.log('L/D ratio: ', Lmag / Dmag);
-    console.log('V: ', this.vel);
-    console.log('position in phsics: ', this.mesh.position);
+      this.vel.set(0,0,0)      
+    }
+       
 
     return {
       position: this.mesh.position
