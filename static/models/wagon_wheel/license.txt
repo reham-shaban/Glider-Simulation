@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wagon Wheel
+* source:	https://sketchfab.com/3d-models/wagon-wheel-522bf736cae646a998522d666430a5a1
+* author:	raeganmaddox (https://sketchfab.com/raeganmaddox)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wagon Wheel" (https://sketchfab.com/3d-models/wagon-wheel-522bf736cae646a998522d666430a5a1) by raeganmaddox (https://sketchfab.com/raeganmaddox) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Druid Hills
+* source:	https://sketchfab.com/3d-models/druid-hills-a18ed8415a544802895581c72bf842bb
+* author:	bilgehan.korkmaz (https://sketchfab.com/bilgehan.korkmaz)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Druid Hills" (https://sketchfab.com/3d-models/druid-hills-a18ed8415a544802895581c72bf842bb) by bilgehan.korkmaz (https://sketchfab.com/bilgehan.korkmaz) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
