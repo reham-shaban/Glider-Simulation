@@ -124,18 +124,18 @@ class Glider{
   }    
 
   update(deltaTime){       
-      // a = F/m
-      this.acc = this.netF.clone().divideScalar(this.mass)
+    // a = F/m
+    this.acc = this.netF.clone().divideScalar(this.mass)
 
-      // Update the velocity based on the acceleration [v = v + (a*dt)]
-      this.vel.add(this.acc.clone().multiplyScalar(deltaTime))
-      // round to two digit after decimial point
-      this.vel.x = Number(this.vel.x.toFixed(2))
-      this.vel.y = Number(this.vel.y.toFixed(2))
-      this.vel.z = Number(this.vel.z.toFixed(2))
+    // Update the velocity based on the acceleration [v = v + (a*dt)]
+    this.vel.add(this.acc.clone().multiplyScalar(deltaTime))
+    // round to two digit after decimial point
+    this.vel.x = Number(this.vel.x.toFixed(2))
+    this.vel.y = Number(this.vel.y.toFixed(2))
+    this.vel.z = Number(this.vel.z.toFixed(2))
 
-      // Update the position based on the velocity [r = r + (v*dt)]
-      this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))          
+    // Update the position based on the velocity [r = r + (v*dt)]
+    this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))          
   }
 
   weight(){
