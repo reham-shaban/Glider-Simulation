@@ -32,7 +32,7 @@ window.addEventListener('mousemove', (event) => {
 var textureLoader = new THREE.TextureLoader();
 var texture444 = textureLoader.load('/src/download.jfif');
 var texture44 = textureLoader.load('/src/download (1).jfif');
-var texture45 = textureLoader.load('/src/OIP.jfif');
+var texture45 = textureLoader.load('/src/download (1).jpg');
 const cubetexture = new THREE.CubeTextureLoader()
 
 const Cloud = new THREE.Group()
@@ -77,7 +77,7 @@ roof.position.y = 3
 roof.rotation.y = Math.PI / 4
 
 //Ground
-const groundgeometry = new THREE.PlaneGeometry(40_000, 40_000)
+const groundgeometry = new THREE.PlaneGeometry(50_000, 50_000)
 const material = new THREE.MeshBasicMaterial({ map: texture45 });
 texture45.repeat.x = 50
 texture45.repeat.y = 50
@@ -87,12 +87,12 @@ const ground = new THREE.Mesh(groundgeometry, material);
 ground.position.set(0, 0, 0)
 scene.add(ground)
 
-//fog 
 const near = 100;
-const far =25_000;
+const far = 25_000;
 const fogColor = new THREE.Color(0xffffff);
-scene.fog = new THREE.Fog(fogColor, near, far);
+const fogDensity = 0.000035; // تعديل كثافة الضباب
 
+scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 // let mixer=null
 // const fox=new GLTFLoader()
 // fox.load(
@@ -122,21 +122,154 @@ hill.load(
 )
 //light
 const color = 0xFFFFFF;
-const intensity =3.5;
+const intensity =1.5;
 const light = new THREE.AmbientLight(color, intensity);
 scene.add(light);
 
-//cloud
+//cloud/*
 const cloud = new GLTFLoader()
 cloud.load(
     '/static/models/cloud_ring/scene.gltf'
     , (gltf) => {
+ 
         //gltf.scene.rotation.y=Math.PI
-        gltf.scene.position.set(0,0,0)
-        gltf.scene.scale.set(1000, 1000, 1000)
+        gltf.scene.position.set(-9000,0,4000)
+        gltf.scene.scale.set(2000, 2000, 2000)
         scene.add(gltf.scene)
     }
 )
+//mill windconst house = new GLTFLoader();
+const modelss = [];
+const house = new GLTFLoader();
+house.load('/static/models/mill-wind/scene.gltf', (gltf) => {
+    for (let i = 0; i < 4; i++) {
+        const model = gltf.scene.clone();
+        model.position.x = 5000 + i * 5000; // Set the X position with an initial offset of 5000 and distance of 1000 units between each model
+        model.position.y = 2500; // Set the desired Y position
+        model.position.z = -10000; // Set the desired Z position
+        model.scale.set(300, 300, 300); // Set the desired scale
+        scene.add(model);
+        modelss.push(model);
+    }
+});
+
+/////////////////////////road
+const road = new GLTFLoader();
+road.load('/static/models/road_straight/scene.gltf', (gltf) => {
+    gltf.scene.rotation.y = Math.PI / 2;
+    gltf.scene.position.set(17000, 0, 0);
+    gltf.scene.scale.set(70, 100,70);
+    scene.add(gltf.scene);
+});
+//////////////////////////////
+let mixer = null;
+const models = [];
+const tahona = new GLTFLoader();
+tahona.load('/static/models/wind/scene.gltf', (gltf) => {
+    const animations = gltf.animations;
+
+    for (let i = 0; i < 10; i++) {
+        const model = gltf.scene.clone();
+        model.position.x = 7000+i * 2000; // Set the X position with a distance of 100 units
+        model.position.y = 2000; // Set the desired Y position
+        model.position.z = -4000; // Set the desired Z position
+        model.rotation.y = -Math.PI/2;
+        model.scale.set(30, 30, 30); // Set the desired scale
+        scene.add(model);
+
+        const mixer = new THREE.AnimationMixer(model);
+        const action = mixer.clipAction(animations[0]);
+        action.play();
+        mixer.timeScale = 10.0; // Increase the animation speed
+        models.push({ model, mixer, action });
+    }
+
+  
+});
+const tahona2 = new GLTFLoader();
+tahona2.load('/static/models/wind/scene.gltf', (gltf) => {
+    const animations = gltf.animations;
+
+    for (let i = 0; i < 10; i++) {
+        const model = gltf.scene.clone();
+        model.position.x = 7000+i * 2000; // Set the X position with a distance of 100 units
+        model.position.y = 2000; // Set the desired Y position
+        model.position.z = 4000; // Set the desired Z position
+        model.rotation.y = Math.PI/2;
+        model.scale.set(30, 30, 30); // Set the desired scale
+        scene.add(model);
+
+        const mixer = new THREE.AnimationMixer(model);
+        const action = mixer.clipAction(animations[0]);
+        action.play();
+        mixer.timeScale = 10.0; // Increase the animation speed
+        models.push({ model, mixer, action });
+    }
+
+  
+});
+const tree = new GLTFLoader();
+const numTrees =70
+tree.load(
+    '/static/models/low_poly_trees_free/scene.gltf',
+    (gltf) => {
+        const startX = 5000;
+        const endX = 20000;
+        const startZ = -600;
+        const endZ = -3000;
+
+        const incrementX = (endX - startX) / (Math.sqrt(numTrees) - 1);
+        const incrementZ = (endZ - startZ) / (Math.sqrt(numTrees) - 1);
+
+        for (let i = 0; i < Math.sqrt(numTrees); i++) {
+            const x = startX + incrementX * i;
+            const z = startZ + incrementZ * i;
+
+            const treeModel = gltf.scene.clone();
+            treeModel.position.set(x, 0, z);
+            treeModel.scale.set(600, 600, 600);
+            scene.add(treeModel);
+
+            for (let j = 1; j < Math.sqrt(numTrees); j++) {
+                const treeModel = gltf.scene.clone();
+                treeModel.position.set(x, 0, z + incrementZ * j);
+                treeModel.scale.set(600, 600, 600);
+                scene.add(treeModel);
+            }
+        }
+    }
+);
+const tree2 = new GLTFLoader();
+const numTrees2 =100
+tree.load(
+    '/static/models/low_poly_trees_free/scene.gltf',
+    (gltf) => {
+        const startX = 2000;
+        const endX = 20000;
+        const startZ = 600;
+        const endZ = 3000;
+
+        const incrementX = (endX - startX) / (Math.sqrt(numTrees2) - 1);
+        const incrementZ = (endZ - startZ) / (Math.sqrt(numTrees2) - 1);
+
+        for (let i = 0; i < Math.sqrt(numTrees); i++) {
+            const x = startX + incrementX * i;
+            const z = startZ + incrementZ * i;
+
+            const treeModel = gltf.scene.clone();
+            treeModel.position.set(x, 0, z);
+            treeModel.scale.set(600, 600, 600);
+            scene.add(treeModel);
+
+            for (let j = 1; j < Math.sqrt(numTrees); j++) {
+                const treeModel = gltf.scene.clone();
+                treeModel.position.set(x, 0, z + incrementZ * j);
+                treeModel.scale.set(600, 600, 600);
+                scene.add(treeModel);
+            }
+        }
+    }
+);
 //cloud2
 const cloud2 = new GLTFLoader()
 cloud2.load(
@@ -144,14 +277,14 @@ cloud2.load(
     , (gltf) => {
         //
         //gltf.scene.rotation.y=Math.PI
-        gltf.scene.position.set(0,3000,0)
+        gltf.scene.position.set(0,4000,0)
         gltf.scene.scale.set(2000, 2000, 2000)
     
       scene.add( gltf.scene)
     }
 )
 
-ground.position.y = 0
+ground.position.y = -10
 ground.rotation.x = -Math.PI * 0.5
 const Stand = new THREE.Group()
 const Plane = new THREE.Group()
@@ -227,8 +360,6 @@ walls2.position.y = -5
 walls2.position.x =0
 Stand.add(walls)
 Stand.add(walls2)
-
-
 Stand.add(mesh1)
 Stand.add(Plane)
 Stand.position.y = 997.5
@@ -246,26 +377,33 @@ Plane.scale.set(1.2,1.2,1.2)
 scene.add(Plane)
 
 
-//axeshelper
-const axeshelper = new THREE.AxesHelper(1)
-scene.add(axeshelper)
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
 window.addEventListener('resize', () => {
-    // console.log("kodkd")
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
-    renderer.setSize(sizes.width, sizes.height)
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+  secondCamera.aspect = sizes.width / sizes.height;
+  secondCamera.updateProjectionMatrix();
+  thirdCamera.aspect = sizes.width / sizes.height;
+  thirdCamera.updateProjectionMatrix();
+  renderer.setSize(sizes.width, sizes.height);
+});
 
-})
-//camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000000)
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000000);
+camera.position.z = 3;
 
-//camera.position.z = 3
+const secondCamera = new THREE.PerspectiveCamera(100, sizes.width / sizes.height, 0.1, 1000000);
+secondCamera.position.y = 100;
+
+const thirdCamera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000000);
+thirdCamera.position.set(0, 1000, 0);
+
+let currentCamera = camera;
+
 var isSpaceKeyPressed = false;
 var shouldGliderMove = false;
 var result = null;
@@ -273,6 +411,15 @@ var result = null;
 function onKeyDown(event) {
   if (event.keyCode === 32) {
     isSpaceKeyPressed = true;
+  } else if (event.keyCode === 13) { // رمز الزر Enter
+    // التبديل بين الكاميرتين
+    currentCamera = currentCamera === camera ? secondCamera : camera;
+    currentCamera.position.copy(camera.position);
+    currentCamera.lookAt(camera.getWorldDirection(new THREE.Vector3()).add(camera.position));
+  } else if (event.keyCode === 79) { // رمز الزر O
+    currentCamera = thirdCamera;
+    currentCamera.position.copy(Plane.position);
+    currentCamera.lookAt(Plane.position.clone().add(Plane.getWorldDirection(new THREE.Vector3())));
   }
 }
 
@@ -280,76 +427,99 @@ function onKeyUp(event) {
   if (event.keyCode === 32) {
     isSpaceKeyPressed = false;
     shouldGliderMove = true;
+  } else if (event.keyCode === 79) { 
+    
+    currentCamera = camera;
+    currentCamera.position.copy(camera.position);
+    currentCamera.lookAt(camera.getWorldDirection(new THREE.Vector3()).add(camera.position));
   }
+  
 }
 
 document.addEventListener("keydown", onKeyDown, false);
 document.addEventListener("keyup", onKeyUp, false);
-scene.add(camera)
 
-//camera.lookAt(mesh.position)
-//console.log(mesh.position.length())
-//console.log(meshs.position.distanceTo(camera.position))
-//mesh.position.normalize()
-const canvas = document.querySelector('.webgl')
+scene.add(camera);
 
-/////////controls
-//const controls = new OrbitControls(camera, canvas)
-//controls.enableDamping = true
+var listener = new THREE.AudioListener();
+camera.add(listener);
+var sound = new THREE.Audio(listener);
+var audioLoader = new THREE.AudioLoader();
+function playSound() {
+  audioLoader.load('./assets/land.MP3', function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(false);
+    sound.setVolume(1);
+    sound.play();
+  });
+}
+function playSound3() {
+  audioLoader.load('./assets/windd.mp3', function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(false);
+    sound.setVolume(1);
+    sound.play();
+  });
+}
+function playSound2() {
+  audioLoader.load('./assets/takeoff.MP3', function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(false);
+    sound.setVolume(1);
+    sound.play();
+  });
+}
+function playSound4(){
+  var vvvv=1
+}
+const canvas = document.querySelector('.webgl');
 
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
-})
-renderer.setSize(sizes.width, sizes.height)
-const clock = new THREE.Clock()
-let previous = 0
-let draw;
+  canvas: canvas
+});
+renderer.setSize(sizes.width, sizes.height);
+
+const clock = new THREE.Clock();
+
 
 const tick = () => {
-
-   // camera.lookAt(new THREE.Vector3(100, 111, 111))
-    window.requestAnimationFrame(tick)
-    const deltaTime = clock.getDelta();
-    const result = glider.execute(deltaTime);
-    Plane.position.copy(result.position);
-    //console.log("position in gui", meshs.position)
-
-    renderer.physicallyCorrectLights = true
-
-    renderer.render(scene, camera)
-
-
-}
-
-
-function animate() {
-    requestAnimationFrame(animate);
-    const deltaTime = clock.getDelta();
-  
- /////////مكابح
+  window.requestAnimationFrame(tick);
+  const deltaTime = clock.getDelta();
+       
+  let isSoundPlayed = false;
   if (shouldGliderMove || (result && !result.done)) {
-    result = glider.execute(deltaTime);
-    Plane.position.copy(result.position);
-    shouldGliderMove = result.done ? false : shouldGliderMove || isSpaceKeyPressed;
-  } 
-//    console.log("position in gui", Plane.position)
-      camera.position.z= 2
    
-    // controls.update()
+    result = glider.execute(deltaTime);
+ 
+    Plane.position.copy(result.position);
+    var planePosition = Plane.position.y;
+    shouldGliderMove = result.done ? false : shouldGliderMove || isSpaceKeyPressed;
+    console.log("hhhhhhhhhhhhh",planePosition)
+   if(planePosition>=1003.0003330000001&&planePosition<1003.1){
+      playSound2()
+    }
+    else if (planePosition>1003.1||(planePosition<1003.0003330000001&&planePosition>300)){
+      playSound3()
+    }
+    else if(planePosition<600&&planePosition>1){
+      playSound()
+    }
+    else{
+      playSound4
+    }
+  }
+  
+  const offsetX = 0;
+  const newPosition = new THREE.Vector3(Plane.position.x + offsetX, Plane.position.y + 8, Plane.position.z + 15);
+  currentCamera.position.copy(newPosition);
+  const delta = clock.getDelta();
 
-//    camera.position.add(direction.multiplyScalar(3));
-//     camera.lookAt(pla.position);
-// Define the distance to offset the camera along the x-axis
-const offsetX =0;
+  models.forEach(({ mixer }) => {
+      if (mixer) {
+          mixer.update(delta);
+      }
+  });
+  renderer.render(scene, currentCamera);
+};
 
-// Create a new position vector for the camera
-const newPosition = new THREE.Vector3(Plane.position.x + offsetX, Plane.position.y + 8, Plane.position.z + 15);
-
-camera.position.copy(newPosition);
-camera.lookAt(Plane.position);
-renderer.physicallyCorrectLights = true
-
-    renderer.render(scene, camera);
-}
-
-animate();
+tick();
