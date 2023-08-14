@@ -31,7 +31,7 @@ class Glider{
     this.AOA = AOA
     this.box = box
     this.skybox = skybox
-    this.windSpeed = windSpeed
+    this.windSpeed = windSpeed * 0.1
     // Coefficient 
     this.CL =  62
     this.CD = 1.6 
@@ -54,9 +54,7 @@ class Glider{
     }
 
     // Check for collision with box
-    const boxBounds = new THREE.Box3().setFromObject(this.box)
-    const gliderBounds = new THREE.Sphere(this.mesh.position, 1)
-    if (boxBounds.intersectsSphere(gliderBounds)) {
+    if(this.is_collision_with_box()) {
         this.vel.setY(0)
         let Fn =  this.w.length()
         let n = new THREE.Vector3(Fn * Math.cos(this.AOA), Fn * Math.sin(this.AOA), 0)
@@ -64,7 +62,13 @@ class Glider{
         // console.log("box n: ", n)
         this.boxFriction()
     }
+  }
 
+  is_collision_with_box(){
+    const boxBounds = new THREE.Box3().setFromObject(this.box)
+    const gliderBounds = new THREE.Sphere(this.mesh.position, 1)
+
+    return boxBounds.intersectsSphere(gliderBounds)
   }
 
   skyboxCollision() {
@@ -152,7 +156,7 @@ class Glider{
 
     // lift magnitude
     let lift = this.CL * q * this.S 
-    this.l = new THREE.Vector3(lift * Math.cos(this.AOA), lift * Math.sin(this.AOA), 0)
+    this.l = new THREE.Vector3(lift * Math.sin(this.AOA), lift * Math.cos(this.AOA), 0)
      
     this.applyForce(this.l)
   }
@@ -169,31 +173,36 @@ class Glider{
     this.applyForce(this.d)
   }
 
+  print(netF, w, l, d, vel, AOA, mesh_position, box_position){
+    console.log("weight: ", w)
+    console.log("lift: ", l)
+    console.log("drag: ", d)
+    // console.log("net force: ", netF)
+    console.log("-----------------")
+    console.log("velocity: ", vel)
+    console.log("-----------------")
+    // console.log("angle of attack: ", AOA)
+    // console.log("position: ", mesh.position)
+    // console.log("box position: ", box.position )
+  }
+
   execute(deltaTime) {
     this.netF.set(0,0,0)
 
     // Check if in the skybox
     if(!this.skyboxCollision()){
+      if(!this.is_collision_with_box()) this.AOA = 0
       this.weight()
       this.collision()
       this.groundFriction()
       this.lift()
       this.drag()  
 
-      // This could be input wind
-      // let i = new THREE.Vector3(200,-200,200)
-      // this.applyForce(i)
-      
-     
       this.update(deltaTime)
     
       // print
-      // console.log("weight: ", this.w)
-      // console.log("lift: ", this.l.length())
-      // console.log("drag: ", this.d)
-      console.log("velocity: ", this.vel)
-      // console.log("position: ", this.mesh.position)
-      // console.log("box position: ", this.box.position )
+      this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
+      
     }
     // Edge of skybox
     else{
