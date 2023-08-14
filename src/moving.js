@@ -31,16 +31,16 @@ class Glider{
     this.AOA = AOA
     this.box = box
     this.skybox = skybox
-    this.windSpeed = windSpeed * 0.1
+    this.windSpeed = windSpeed
     // Coefficient 
-    this.CL =  62
-    this.CD = 1.6 
+    this.CL = 11.2727 * 2 * Math.PI * this.AOA
+    this.CD = 0.16 
     // world
     this.world = new World()
-
     // Initialize the velocityand netForce vectors 
     this.vel = new THREE.Vector3()
     this.netF = new THREE.Vector3()
+    this.v=this.vel.length()
   }
 
   collision(){
@@ -177,10 +177,10 @@ class Glider{
     console.log("weight: ", w)
     console.log("lift: ", l)
     console.log("drag: ", d)
-    // console.log("net force: ", netF)
+    console.log("net force: ", netF)
     console.log("-----------------")
     console.log("velocity: ", vel)
-    console.log("-----------------")
+    // console.log("-----------------")
     // console.log("angle of attack: ", AOA)
     // console.log("position: ", mesh.position)
     // console.log("box position: ", box.position )
@@ -191,18 +191,20 @@ class Glider{
 
     // Check if in the skybox
     if(!this.skyboxCollision()){
-      if(!this.is_collision_with_box()) this.AOA = 0
+      // if(!this.is_collision_with_box()) this.AOA = 0
       this.weight()
       this.collision()
       this.groundFriction()
       this.lift()
-      this.drag()  
-
+      this.drag()
       this.update(deltaTime)
     
       // print
-      this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
+      // this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
       
+      this.v = this.vel.length();
+      this.angelOfAttack = this.AOA
+      this.CL = 11.2727 * 2 * Math.PI * this.AOA
     }
     // Edge of skybox
     else{
@@ -211,7 +213,8 @@ class Glider{
        
 
     return {
-      position: this.mesh.position
+      position: this.mesh.position,
+      AOA: this.AOA
     };
    
   };

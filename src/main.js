@@ -157,8 +157,8 @@ house.load('/static/models/mill-wind/scene.gltf', (gltf) => {
 const road = new GLTFLoader();
 road.load('/static/models/road_straight/scene.gltf', (gltf) => {
     gltf.scene.rotation.y = Math.PI / 2;
-    gltf.scene.position.set(17000, 0, 0);
-    gltf.scene.scale.set(70, 100,70);
+    gltf.scene.position.set(10000, 0, 0);
+    gltf.scene.scale.set(100, 10,70);
     scene.add(gltf.scene);
 });
 //////////////////////////////
@@ -294,7 +294,7 @@ let AOA = 5 * (Math.PI / 180)
 
 //////under_the_plane
 // const under_the_plane = new THREE.BoxGeometry(2, 28, 0.8)
-const under_the_plane = new THREE.BoxGeometry(8, 0.5, 40)
+const under_the_plane = new THREE.BoxGeometry(8, 0.5, 60)
 const material3 = new THREE.MeshBasicMaterial({ map: texture444 });
 const mesh1 = new THREE.Mesh(under_the_plane, material3);
 mesh1.position.y = 3
@@ -308,14 +308,16 @@ mesh1.rotation.x = AOA
 let mass = 100;
 let S = 70; // S
 let windSpeed = 20
-
+var v, cl, aoa
 // Glider(glider, mass, S, AOA, box, skybox, windSpeed)
 var glider = new Glider(Plane, mass, S, AOA, mesh1, meshsky, windSpeed);
-// glider.mesh.rotation.x = AOA 
 
 gui.add(glider, 'mass', 100, 1000, 10);
 gui.add(glider, 'S', 0, 100, 2);
-gui.add(glider, 'windSpeed', 0, 50, 1);
+gui.add(glider, 'windSpeed', 0, 100, 1);
+aoa=gui.add(glider, 'AOA', -0.5, 0.5, 0.01);
+v=gui.add(glider,'v');
+cl=gui.add(glider, 'CL');
 
 plane.load(
     '/static/models/ask_21_mi/scene.gltf'
@@ -324,6 +326,7 @@ plane.load(
         // gltf.scene.position.z=-2
         gltf.scene.position.y = 3
         gltf.scene.rotation.y = Math.PI * 0.5
+        gltf.scene.rotation.x = AOA
         gltf.scene.scale.set(1, 1, 1)
         Plane.add(gltf.scene)
     }
@@ -490,11 +493,13 @@ const tick = () => {
   if (shouldGliderMove || (result && !result.done)) {
    
     result = glider.execute(deltaTime);
+    console.log('aaooa', result.AOA)
+    Plane.rotation.z = result.AOA
  
     Plane.position.copy(result.position);
     var planePosition = Plane.position.y;
     shouldGliderMove = result.done ? false : shouldGliderMove || isSpaceKeyPressed;
-    console.log("hhhhhhhhhhhhh",planePosition)
+    // console.log("hhhhhhhhhhhhh",planePosition)
    if(planePosition>=1003.0003330000001&&planePosition<1003.1){
       playSound2()
     }
@@ -516,7 +521,10 @@ const tick = () => {
 
   models.forEach(({ mixer }) => {
       if (mixer) {
-          mixer.update(delta);
+        aoa.updateDisplay();
+        v.updateDisplay();
+        cl.updateDisplay();
+        mixer.update(delta);
       }
   });
   renderer.render(scene, currentCamera);
