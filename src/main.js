@@ -84,7 +84,7 @@ hill.load(
     , (gltf) => {
         //
         //gltf.scene.rotation.y=Math.PI
-        gltf.scene.position.set(-2015, -1000, 155)
+        gltf.scene.position.set(-7015, -1000, 155)
         gltf.scene.scale.set(1, 1, 1)
     
         scene.add(gltf.scene)

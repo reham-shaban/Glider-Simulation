@@ -45,12 +45,12 @@ class Glider{
 
   collision(){
     // Check for collision on the ground
-    if(this.mesh.position.y <= 0){
+    if(this.mesh.position.y <= 10){
       this.vel.setY(0)
       let Fn =  this.w.length()
       let n = new THREE.Vector3(0, Fn, 0)
       this.applyForce(n)
-      // console.log("ground n: ", n)
+      console.log("ground n: ", n)
     }
 
     // Check for collision with box
@@ -95,7 +95,7 @@ class Glider{
     let fricV = new THREE.Vector3(-fric, 0, 0)
    
     // apply when it hit the ground
-    if(this.mesh.position.y <= 0 && this.vel.x > 0){
+    if(this.mesh.position.y <= 10 && this.vel.x > 0){
       // this.vel.x *= 0.1
       this.applyForce(fricV)
       console.log("ground friction:", fricV)
@@ -134,9 +134,10 @@ class Glider{
     // Update the velocity based on the acceleration [v = v + (a*dt)]
     this.vel.add(this.acc.clone().multiplyScalar(deltaTime))
     // round to two digit after decimial point
-    this.vel.x = Number(this.vel.x.toFixed(2))
-    this.vel.y = Number(this.vel.y.toFixed(2))
-    this.vel.z = Number(this.vel.z.toFixed(2))
+    this.vel.x = Number(this.vel.x.toFixed(1))
+    this.vel.y = Number(this.vel.y.toFixed(1))
+    this.vel.z = Number(this.vel.z.toFixed(1))
+    if (this.vel.y <= 0 && this.vel.y >= -1)  this.vel.setY(0)
 
     // Update the position based on the velocity [r = r + (v*dt)]
     this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))          
@@ -175,10 +176,10 @@ class Glider{
 
   print(netF, w, l, d, vel, AOA, mesh_position, box_position){
     console.log("weight: ", w)
-    console.log("lift: ", l)
-    console.log("drag: ", d)
-    console.log("net force: ", netF)
-    console.log("-----------------")
+    // console.log("lift: ", l)
+    // console.log("drag: ", d)
+    // console.log("net force: ", netF)
+    // console.log("-----------------")
     console.log("velocity: ", vel)
     // console.log("-----------------")
     // console.log("angle of attack: ", AOA)
@@ -198,7 +199,7 @@ class Glider{
     this.update(deltaTime)
   
     // print
-    // this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
+    this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
     
     this.v = this.vel.length();
     this.angelOfAttack = this.AOA
