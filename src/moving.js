@@ -1,26 +1,6 @@
 import * as THREE from 'three'
 import World from './world'
 
-// Wind
-const WindMatrix = wind();
-function wind() {
-  let N = 10, height = 0, Matrix = [];
-
-  for(let i = 0 ; i < N ; i++){    
-      let windCurrent = {
-          minHeight : height,
-          maxHeight : height + Math.ceil (Math.random() * 10000), 
-          windSpeed : Math.ceil (Math.random() * 500),
-          Xangle :  Math.random() * 2 * Math.PI,
-          Yangle :  Math.random() * 2 * Math.PI,
-          Zangle :  Math.random() * 2 * Math.PI,
-      }
-      height = windCurrent.maxHeight;
-      Matrix.push(windCurrent);
-  }
-  return Matrix;
-}
-
 // Glider class
 class Glider{
   constructor(glider, mass, S, AOA, box, skybox, windSpeed) { 
@@ -127,9 +107,13 @@ class Glider{
     this.netF.add(force)
   }    
 
-  update(deltaTime){       
+  Acceleration(){
+    return this.netF.clone().divideScalar(this.mass)
+  }
+
+  velocity(deltaTime){       
     // a = F/m
-    this.acc = this.netF.clone().divideScalar(this.mass)
+    this.acc =this.Acceleration()
 
     // Update the velocity based on the acceleration [v = v + (a*dt)]
     this.vel.add(this.acc.clone().multiplyScalar(deltaTime))
@@ -196,7 +180,7 @@ class Glider{
     this.groundFriction()
     this.lift()
     this.drag()
-    this.update(deltaTime)
+    this.velocity(deltaTime)
   
     // print
     this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
