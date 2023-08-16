@@ -300,7 +300,7 @@ plane.load(
       // gltf.scene.position.z=-2
       gltf.scene.position.y = 3
 
-     // gltf.scene.rotation.z = Math.PI * 0.1
+     gltf.scene.rotation.z = Math.PI * AOA
       gltf.scene.scale.set(1, 1, 1)
       Plane.add(gltf.scene)
   }
@@ -471,6 +471,7 @@ const tick = () => {
     
 
     result = glider.execute(deltaTime);
+    Plane.rotation.z = result.AOA
     
     Plane.position.copy(result.position);
     var planePosition = Plane.position.y;
