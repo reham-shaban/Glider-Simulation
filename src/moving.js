@@ -189,29 +189,22 @@ class Glider{
   execute(deltaTime) {
     this.netF.set(0,0,0)
 
-    // Check if in the skybox
-    if(!this.skyboxCollision()){
-      // if(!this.is_collision_with_box()) this.AOA = 0
-      this.weight()
-      this.collision()
-      this.groundFriction()
-      this.lift()
-      this.drag()
-      this.update(deltaTime)
+    // if(!this.is_collision_with_box()) this.AOA = 0
+    this.weight()
+    this.collision()
+    this.groundFriction()
+    this.lift()
+    this.drag()
+    this.update(deltaTime)
+  
+    // print
+    // this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
     
-      // print
-      // this.print(this.netF, this.w, this.l, this.d, this.vel, this.AOA, this.mesh.position, this.box.position)
-      
-      this.v = this.vel.length();
-      this.angelOfAttack = this.AOA
-      this.CL = 11.2727 * 2 * Math.PI * this.AOA
-    }
-    // Edge of skybox
-    else{
-      this.vel.set(0,0,0)      
-    }
-       
-
+    this.v = this.vel.length();
+    this.angelOfAttack = this.AOA
+    this.CL = 11.2727 * 2 * Math.PI * this.AOA
+  
+     
     return {
       position: this.mesh.position,
       AOA: this.AOA

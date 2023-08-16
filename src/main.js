@@ -27,7 +27,6 @@ window.addEventListener('mousemove', (event) => {
     cursor.x = event.clientX / sizes.width - 0.5
     cursor.y = -(event.clientY / sizes.height - 0.5)
 })
-
 //textures
 var textureLoader = new THREE.TextureLoader();
 var texture444 = textureLoader.load('/src/download.jfif');
@@ -37,8 +36,7 @@ const cubetexture = new THREE.CubeTextureLoader()
 
 const Cloud = new THREE.Group()
 const scene = new THREE.Scene()
-/*const mapenvironment=cubetexture.load([
-
+const mapenvironment=cubetexture.load([
     '/static/textures/environmentMaps/1/px.jpg',
     '/static/textures/environmentMaps/1/nx.jpg',
     '/static/textures/environmentMaps/1/py.jpg',
@@ -48,34 +46,7 @@ const scene = new THREE.Scene()
     
 ])
 console.log(mapenvironment)
-scene.background=mapenvironment*/
-
-//material for sky box
-let materialsArray = []
-let texture1 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/px.jpg',)
-let texture2 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/nx.jpg',)
-let texture3 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/py.jpg',)
-let texture4 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/ny.jpg',)
-let texture5 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/pz.jpg',)
-let texture6 = new THREE.TextureLoader().load('/static/textures/environmentMaps/1/nz.jpg')
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture1 }))
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture2 }))
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture3 }))
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture4 }))
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture5 }))
-materialsArray.push(new THREE.MeshBasicMaterial({ map: texture6 }))
-for (let i = 0; i < 6; i++)
-    materialsArray[i].side = THREE.BackSide
-let boxgeometry = new THREE.BoxGeometry(30_000, 30_000, 30_000)
-let meshsky = new THREE.Mesh(boxgeometry, materialsArray)
-meshsky.position.set(7_000, 3_000, 0)
-scene.add(meshsky)
-const roof = new THREE.Mesh(
-    new THREE.ConeGeometry(3, 1, 4)
-    , new THREE.MeshBasicMaterial({ color: 'blue' }))
-roof.position.y = 3
-roof.rotation.y = Math.PI / 4
-
+scene.background=mapenvironment
 //Ground
 const groundgeometry = new THREE.PlaneGeometry(50_000, 50_000)
 const material = new THREE.MeshBasicMaterial({ map: texture45 });
@@ -86,7 +57,6 @@ texture45.wrapT = THREE.RepeatWrapping
 const ground = new THREE.Mesh(groundgeometry, material);
 ground.position.set(0, 0, 0)
 scene.add(ground)
-
 const near = 100;
 const far = 25_000;
 const fogColor = new THREE.Color(0xffffff);
@@ -157,8 +127,8 @@ house.load('/static/models/mill-wind/scene.gltf', (gltf) => {
 const road = new GLTFLoader();
 road.load('/static/models/road_straight/scene.gltf', (gltf) => {
     gltf.scene.rotation.y = Math.PI / 2;
-    gltf.scene.position.set(10000, 0, 0);
-    gltf.scene.scale.set(100, 10,70);
+    gltf.scene.position.set(17000, 0, 0);
+    gltf.scene.scale.set(70, 100,70);
     scene.add(gltf.scene);
 });
 //////////////////////////////
@@ -183,7 +153,6 @@ tahona.load('/static/models/wind/scene.gltf', (gltf) => {
         mixer.timeScale = 10.0; // Increase the animation speed
         models.push({ model, mixer, action });
     }
-
   
 });
 const tahona2 = new GLTFLoader();
@@ -310,7 +279,8 @@ let S = 70; // S
 let windSpeed = 20
 var v, cl, aoa
 // Glider(glider, mass, S, AOA, box, skybox, windSpeed)
-var glider = new Glider(Plane, mass, S, AOA, mesh1, meshsky, windSpeed);
+var glider = new Glider(Plane, mass, S, AOA, mesh1, mapenvironment, windSpeed);
+// glider.mesh.rotation.x = AOA 
 
 gui.add(glider, 'mass', 100, 1000, 10);
 gui.add(glider, 'S', 0, 100, 2);
@@ -320,16 +290,17 @@ v=gui.add(glider,'v');
 cl=gui.add(glider, 'CL');
 
 plane.load(
-    '/static/models/ask_21_mi/scene.gltf'
-    , (gltf) => {
-        gltf.scene.position.x = 1
-        // gltf.scene.position.z=-2
-        gltf.scene.position.y = 3
-        gltf.scene.rotation.y = Math.PI * 0.5
-        gltf.scene.rotation.x = AOA
-        gltf.scene.scale.set(1, 1, 1)
-        Plane.add(gltf.scene)
-    }
+  '/static/models/ask_21_mi/scene.gltf'
+  , (gltf) => {
+     
+      gltf.scene.position.x = 1
+      // gltf.scene.position.z=-2
+      gltf.scene.position.y = 3
+
+     // gltf.scene.rotation.z = Math.PI * 0.1
+      gltf.scene.scale.set(1, 1, 1)
+      Plane.add(gltf.scene)
+  }
 )
 //wheel
 const wagon_wheel = new GLTFLoader()
@@ -488,14 +459,16 @@ const clock = new THREE.Clock();
 const tick = () => {
   window.requestAnimationFrame(tick);
   const deltaTime = clock.getDelta();
-       
+  Plane.rotation.y= Math.PI
   let isSoundPlayed = false;
   if (shouldGliderMove || (result && !result.done)) {
-   
+     Plane.rotation.z=Math.PI*0.1
+    
+   // Plane.rotation.x= Math.PI*0.5 
+    
+
     result = glider.execute(deltaTime);
-    console.log('aaooa', result.AOA)
-    Plane.rotation.z = result.AOA
- 
+    
     Plane.position.copy(result.position);
     var planePosition = Plane.position.y;
     shouldGliderMove = result.done ? false : shouldGliderMove || isSpaceKeyPressed;
@@ -513,7 +486,6 @@ const tick = () => {
       playSound4
     }
   }
-  
   const offsetX = 0;
   const newPosition = new THREE.Vector3(Plane.position.x + offsetX, Plane.position.y + 8, Plane.position.z + 15);
   currentCamera.position.copy(newPosition);
