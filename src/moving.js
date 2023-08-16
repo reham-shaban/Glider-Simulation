@@ -3,7 +3,7 @@ import World from './world'
 
 // Glider class
 class Glider{
-  constructor(glider, mass, S, AOA, box, skybox, windSpeed) { 
+  constructor(glider, mass, S, AOA, box, skybox, windSpeed, heightScalar) { 
     // inputs
     this.mesh = glider
     this.mass = mass
@@ -21,6 +21,13 @@ class Glider{
     this.vel = new THREE.Vector3()
     this.netF = new THREE.Vector3()
     this.v=this.vel.length()
+
+    // outputs
+    this.gravity = this.world.calc_gravity(this.mesh.position.y)
+    this.temperature = this.world.calc_tempereture(this.mesh.position.y)
+    this.pressure =  this.world.calc_pressure(this.mesh.position.y)
+    this.air_density = this.world.calc_air_rho(this.mesh.position.y)
+  
   }
 
   collision(){
@@ -188,6 +195,10 @@ class Glider{
     this.v = this.vel.length();
     this.angelOfAttack = this.AOA
     this.CL = 11.2727 * 2 * Math.PI * this.AOA
+    this.gravity = this.world.calc_gravity(this.mesh.position.y)
+    this.temperature = this.world.calc_tempereture(this.mesh.position.y)
+    this.pressure =  this.world.calc_pressure(this.mesh.position.y)
+    this.air_density = this.world.calc_air_rho(this.mesh.position.y)
   
      
     return {

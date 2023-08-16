@@ -277,17 +277,20 @@ mesh1.rotation.x = AOA
 let mass = 100;
 let S = 70; // S
 let windSpeed = 20
-var v, cl, aoa
-// Glider(glider, mass, S, AOA, box, skybox, windSpeed)
+var m, wing_area, wind_speed, aoa, v, cl,  T, P, rho
+// Glider(glider, mass, S, AOA, box, skybox, windSpeed, heightScalar)
 var glider = new Glider(Plane, mass, S, AOA, mesh1, mapenvironment, windSpeed);
 // glider.mesh.rotation.x = AOA 
 
-gui.add(glider, 'mass', 100, 1000, 10);
-gui.add(glider, 'S', 0, 100, 2);
-gui.add(glider, 'windSpeed', 0, 100, 1);
+m=gui.add(glider, 'mass', 100, 1000, 10);
+wing_area=gui.add(glider, 'S', 0, 100, 2);
+wind_speed=gui.add(glider, 'windSpeed', 0, 100, 1);
 aoa=gui.add(glider, 'AOA', -0.5, 0.5, 0.01);
 v=gui.add(glider,'v');
 cl=gui.add(glider, 'CL');
+T=gui.add(glider, 'temperature');
+P=gui.add(glider, 'pressure');
+rho=gui.add(glider, 'air_density');
 
 plane.load(
   '/static/models/ask_21_mi/scene.gltf'
@@ -493,9 +496,15 @@ const tick = () => {
 
   models.forEach(({ mixer }) => {
       if (mixer) {
+        m.updateDisplay();
+        wing_area.updateDisplay();
+        wind_speed.updateDisplay();
         aoa.updateDisplay();
         v.updateDisplay();
         cl.updateDisplay();
+        // T.updateDisplay();
+        P.updateDisplay();
+        rho.updateDisplay();
         mixer.update(delta);
       }
   });
