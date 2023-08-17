@@ -260,13 +260,13 @@ const Plane = new THREE.Group()
 const plane = new GLTFLoader()
 
 let AOA = 5 * (Math.PI / 180)
-
+let height = 1000
 //////under_the_plane
 // const under_the_plane = new THREE.BoxGeometry(2, 28, 0.8)
 const under_the_plane = new THREE.BoxGeometry(8, 0.5, 60)
 const material3 = new THREE.MeshBasicMaterial({ map: texture444 });
 const mesh1 = new THREE.Mesh(under_the_plane, material3);
-mesh1.position.y = 3
+mesh1.position.y = -1
 mesh1.position.x = 3
 mesh1.position.z = 7
 mesh1.rotation.x = AOA
@@ -277,18 +277,18 @@ mesh1.rotation.x = AOA
 let mass = 100;
 let S = 70; // S
 let windSpeed = 20
-var m, wing_area, wind_speed, aoa, v, cl,  T, P, rho
-// Glider(glider, mass, S, AOA, box, skybox, windSpeed, heightScalar)
-var glider = new Glider(Plane, mass, S, AOA, mesh1, mapenvironment, windSpeed);
+var h, m, wing_area, wind_speed, aoa, v, cl,  T, P, rho
+// Glider(glider, mass, S, AOA, box, skybox, windSpeed, height)
+var glider = new Glider(Plane, mass, S, AOA, mesh1, mapenvironment, windSpeed, height);
 // glider.mesh.rotation.x = AOA 
 
+h=gui.add(glider, 'height', 0, 10_000, 10);
 m=gui.add(glider, 'mass', 100, 1000, 10);
 wing_area=gui.add(glider, 'S', 0, 100, 2);
 wind_speed=gui.add(glider, 'windSpeed', 0, 100, 1);
 aoa=gui.add(glider, 'AOA', -0.5, 0.5, 0.01);
 v=gui.add(glider,'v');
 cl=gui.add(glider, 'CL');
-T=gui.add(glider, 'temperature');
 P=gui.add(glider, 'pressure');
 rho=gui.add(glider, 'air_density');
 
@@ -298,7 +298,7 @@ plane.load(
      
       gltf.scene.position.x = 1
       // gltf.scene.position.z=-2
-      gltf.scene.position.y = 3
+      gltf.scene.position.y = 0
 
      gltf.scene.rotation.z = Math.PI * AOA
       gltf.scene.scale.set(1, 1, 1)
@@ -345,8 +345,8 @@ Stand.position.z = -100
 Stand.scale.set(2,2,2)
 Stand.rotation.y=Math.PI*0.5
 scene.add(Stand)
-let xxx=1003
-Plane.position.y = xxx
+
+Plane.position.y = height
 Plane.position.x = 125
 Plane.position.z = -100
 Plane.rotation.y=Math.PI*0.5
@@ -471,7 +471,8 @@ const tick = () => {
     
 
     result = glider.execute(deltaTime);
-    Plane.rotation.z = result.AOA
+    Plane.rotation.z = -result.AOA
+    Plane.position.y = result.height
     
     Plane.position.copy(result.position);
     var planePosition = Plane.position.y;
@@ -497,13 +498,13 @@ const tick = () => {
 
   models.forEach(({ mixer }) => {
       if (mixer) {
+        h.updateDisplay();
         m.updateDisplay();
         wing_area.updateDisplay();
         wind_speed.updateDisplay();
         aoa.updateDisplay();
         v.updateDisplay();
         cl.updateDisplay();
-        // T.updateDisplay();
         P.updateDisplay();
         rho.updateDisplay();
         mixer.update(delta);

@@ -3,7 +3,7 @@ import World from './world'
 
 // Glider class
 class Glider{
-  constructor(glider, mass, S, AOA, box, skybox, windSpeed, heightScalar) { 
+  constructor(glider, mass, S, AOA, box, skybox, windSpeed, height) { 
     // inputs
     this.mesh = glider
     this.mass = mass
@@ -12,6 +12,7 @@ class Glider{
     this.box = box
     this.skybox = skybox
     this.windSpeed = windSpeed
+    this.height = height
     // Coefficient 
     this.CL = 11.2727 * 2 * Math.PI * this.AOA
     this.CD = 0.16 
@@ -28,6 +29,7 @@ class Glider{
     this.pressure =  this.world.calc_pressure(this.mesh.position.y)
     this.air_density = this.world.calc_air_rho(this.mesh.position.y)
   
+    console.log('h: ' ,this.mesh.position.y)
   }
 
   collision(){
@@ -199,11 +201,12 @@ class Glider{
     this.temperature = this.world.calc_tempereture(this.mesh.position.y)
     this.pressure =  this.world.calc_pressure(this.mesh.position.y)
     this.air_density = this.world.calc_air_rho(this.mesh.position.y)
-  
+    this.mesh.position.y = this.height
      
     return {
       position: this.mesh.position,
-      AOA: this.AOA
+      AOA: this.AOA,
+      height: this.height
     };
    
   };
