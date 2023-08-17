@@ -18,15 +18,7 @@ import * as dat from 'dat.gui'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const gui = new dat.GUI()
-const cursor = {
-    x: 0,
-    y: 0
-}
-window.addEventListener('mousemove', (event) => {
 
-    cursor.x = event.clientX / sizes.width - 0.5
-    cursor.y = -(event.clientY / sizes.height - 0.5)
-})
 //textures
 var textureLoader = new THREE.TextureLoader();
 var texture444 = textureLoader.load('/src/download.jfif');
@@ -57,25 +49,13 @@ texture45.wrapT = THREE.RepeatWrapping
 const ground = new THREE.Mesh(groundgeometry, material);
 ground.position.set(0, 0, 0)
 scene.add(ground)
+//fog
 const near = 100;
 const far = 25_000;
 const fogColor = new THREE.Color(0xffffff);
-const fogDensity = 0.000035; // تعديل كثافة الضباب
+const fogDensity = 0.000035; 
 
 scene.fog = new THREE.FogExp2(fogColor, fogDensity);
-// let mixer=null
-// const fox=new GLTFLoader()
-// fox.load(
-//     '/static/models/Fox/glTF/Fox.gltf'
-//     , (gltf)=>{
-//          mixer=new THREE.AnimationMixer(gltf.scene)
-//        const action=mixer.clipAction(gltf.animations[2])
-//        action.play()
-//         gltf.scene.position.y=4
-//         gltf.scene.scale.set(0.025,0.025,0.025)
-//         pla.add(gltf.scene)
-//     }
-// )
 
 //mountain
 const hill = new GLTFLoader()
@@ -96,7 +76,7 @@ const intensity =1.5;
 const light = new THREE.AmbientLight(color, intensity);
 scene.add(light);
 
-//cloud/*
+//cloud
 const cloud = new GLTFLoader()
 cloud.load(
     '/static/models/cloud_ring/scene.gltf'
@@ -108,7 +88,7 @@ cloud.load(
         scene.add(gltf.scene)
     }
 )
-//mill windconst house = new GLTFLoader();
+//mill windconst 
 const modelss = [];
 const house = new GLTFLoader();
 house.load('/static/models/mill-wind/scene.gltf', (gltf) => {
@@ -131,7 +111,7 @@ road.load('/static/models/road_straight/scene.gltf', (gltf) => {
     gltf.scene.scale.set(70, 100,70);
     scene.add(gltf.scene);
 });
-//////////////////////////////
+//////////////////////////////tahona
 let mixer = null;
 const models = [];
 const tahona = new GLTFLoader();
@@ -178,11 +158,11 @@ tahona2.load('/static/models/wind/scene.gltf', (gltf) => {
   
 });
 const tree = new GLTFLoader();
-const numTrees =70
+const numTrees =100
 tree.load(
     '/static/models/low_poly_trees_free/scene.gltf',
     (gltf) => {
-        const startX = 5000;
+        const startX = 2000;
         const endX = 20000;
         const startZ = -600;
         const endZ = -3000;
@@ -367,6 +347,7 @@ window.addEventListener('resize', () => {
   secondCamera.updateProjectionMatrix();
   thirdCamera.aspect = sizes.width / sizes.height;
   thirdCamera.updateProjectionMatrix();
+
   renderer.setSize(sizes.width, sizes.height);
 });
 
@@ -377,7 +358,11 @@ const secondCamera = new THREE.PerspectiveCamera(100, sizes.width / sizes.height
 secondCamera.position.y = 100;
 
 const thirdCamera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000000);
+
 thirdCamera.position.set(0, 1000, 0);
+const frontCamera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000000);
+frontCamera.position.set(Plane.position.x-10000, Plane.position.y-250, Plane.position.z );
+frontCamera.lookAt(Plane.position);
 
 let currentCamera = camera;
 
@@ -388,29 +373,27 @@ var result = null;
 function onKeyDown(event) {
   if (event.keyCode === 32) {
     isSpaceKeyPressed = true;
-  } else if (event.keyCode === 13) { // رمز الزر Enter
-    // التبديل بين الكاميرتين
+  } else if (event.keyCode === 13) { // Enter key code
     currentCamera = currentCamera === camera ? secondCamera : camera;
     currentCamera.position.copy(camera.position);
     currentCamera.lookAt(camera.getWorldDirection(new THREE.Vector3()).add(camera.position));
-  } else if (event.keyCode === 79) { // رمز الزر O
-    currentCamera = thirdCamera;
-    currentCamera.position.copy(Plane.position);
-    currentCamera.lookAt(Plane.position.clone().add(Plane.getWorldDirection(new THREE.Vector3())));
+
   }
+  else if (event.keyCode === 70 || event.keyCode === 102) { // 'F' or 'f'
+    currentCamera = frontCamera;
+    frontCamera.position.set(Plane.position.x-10000, Plane.position.y-250, Plane.position.z );
+    frontCamera.lookAt(Plane.position);
+  }
+ 
+ 
 }
+
 
 function onKeyUp(event) {
   if (event.keyCode === 32) {
     isSpaceKeyPressed = false;
     shouldGliderMove = true;
-  } else if (event.keyCode === 79) { 
-    
-    currentCamera = camera;
-    currentCamera.position.copy(camera.position);
-    currentCamera.lookAt(camera.getWorldDirection(new THREE.Vector3()).add(camera.position));
-  }
-  
+  } 
 }
 
 document.addEventListener("keydown", onKeyDown, false);
