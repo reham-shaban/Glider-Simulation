@@ -133,7 +133,8 @@ class Glider{
     if (this.vel.y <= 0 && this.vel.y >= -1)  this.vel.setY(0)
 
     // Update the position based on the velocity [r = r + (v*dt)]
-    this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))          
+    this.mesh.position.add(this.vel.clone().multiplyScalar(deltaTime))  
+    this.height = this.mesh.position.y        
   }
 
   weight(){
