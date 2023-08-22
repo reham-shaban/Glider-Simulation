@@ -445,6 +445,7 @@ const clock = new THREE.Clock();
 const tick = () => {
   window.requestAnimationFrame(tick);
   const deltaTime = clock.getDelta();
+  // const deltaTime = 0.01;
   Plane.rotation.y= Math.PI
   let isSoundPlayed = false;
   if (shouldGliderMove || (result && !result.done)) {

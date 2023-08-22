@@ -170,21 +170,16 @@ class Glider{
 
   print(netF, w, l, d, vel, AOA, mesh_position, box_position){
     console.log("weight: ", w)
-    // console.log("lift: ", l)
-    // console.log("drag: ", d)
-    // console.log("net force: ", netF)
-    // console.log("-----------------")
+    console.log("lift: ", l)
+    console.log("drag: ", d)
+    console.log("net force: ", netF)
     console.log("velocity: ", vel)
-    // console.log("-----------------")
-    // console.log("angle of attack: ", AOA)
-    // console.log("position: ", mesh.position)
-    // console.log("box position: ", box.position )
+    console.log("angle of attack: ", AOA)
   }
 
   execute(deltaTime) {
     this.netF.set(0,0,0)
 
-    // if(!this.is_collision_with_box()) this.AOA = 0
     this.weight()
     this.collision()
     this.groundFriction()
